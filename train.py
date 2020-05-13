@@ -33,16 +33,19 @@ def getFeatureVector(vocab, spam):
     for fname in os.listdir(os.getcwd() + '/' + dir):
         with open( '{}/{}/{}'.format(os.getcwd(), dir, fname), 'r') as doc:
             processDoc(doc, vocab, fv)
+    return fv
 
-
+def save(object, filename):
+    with open(filename, 'wb') as f:
+        pickle.dump(object, f)
 
 def main():
     v = buildVocab((NONSPAM_DIR, SPAM_DIR))
     s_vect = getFeatureVector(v, True)
-    ns_vect = getFeatureVector(v,    False)
-    pickle.dump(v, open('obj/vocab.p', 'wb'))
-    pickle.dump(s_vect, open('obj/nonspam_cts.p', 'wb'))
-    pickle.dump(s_vect, open('obj/spam_cts.p', 'wb'))
+    ns_vect = getFeatureVector(v,False)
+    save(v, 'obj/vocab.p')
+    save(ns_vect, 'obj/nonspam_cts.p')
+    save(s_vect, 'obj/spam_cts.p')
     print('done')
 
 if __name__ == '__main__':

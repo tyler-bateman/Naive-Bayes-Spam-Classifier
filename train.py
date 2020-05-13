@@ -35,6 +35,15 @@ def getFeatureVector(vocab, spam):
             processDoc(doc, vocab, fv)
 
 
-v = buildVocab((NONSPAM_DIR, SPAM_DIR))
 
-getFeatureVector(v, True)
+def main():
+    v = buildVocab((NONSPAM_DIR, SPAM_DIR))
+    s_vect = getFeatureVector(v, True)
+    ns_vect = getFeatureVector(v,    False)
+    pickle.dump(v, open('obj/vocab.p', 'wb'))
+    pickle.dump(s_vect, open('obj/nonspam_cts.p', 'wb'))
+    pickle.dump(s_vect, open('obj/spam_cts.p', 'wb'))
+    print('done')
+
+if __name__ == '__main__':
+    main()

@@ -7,6 +7,7 @@ SPAM_DIR = "data/spam-train"
 
 #Precondition: numDocs must be less than or equal to the number of training docs in the train folders
 def buildVocab(trainFolders, numDocs):
+    print('Number of training documents:', str(numDocs))
     words = []
     for folder in trainFolders:
         files =  os.listdir(os.getcwd() + '/' + folder)
@@ -16,8 +17,19 @@ def buildVocab(trainFolders, numDocs):
     vocab = Vocabulary(words, unk_cutoff = 1)
     print(len(vocab), 'unique words')
 
-    while len(vocab) > 3000:
+    #Set the cutoff the the greatest value where len(vocab is greater than 2500)
+    while len(vocab) > 2500:
         vocab._cutoff += 1
+    vocab._cutoff -= 1
+
+    print('Length of vocab before trimming:' + str(len(vocab)))
+    #Remove words right above the cutoff until the length of the vocab is 2500
+    rCount = 0
+    for word in words:
+        if(vocab[word] == vocab._cutoff):
+            del vocab.counts[word]
+        if rCount >= len(vocab) - 2500:
+            break
 
     print('dictionary size:', len(vocab))
     return vocab

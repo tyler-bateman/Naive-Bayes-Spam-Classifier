@@ -1,3 +1,32 @@
+
+Results for model trained on 50 documents:
+True positives: 68
+False negatives: 62
+True negatives: 129
+False positives: 1
+Precision: 0.9855072463768116
+Recall: 0.5230769230769231
+F score: 0.6834170854271358
+
+Results for model trained on 100 documents:
+True positives: 73
+False negatives: 57
+True negatives: 130
+False positives: 0
+Precision: 1.0
+Recall: 0.5615384615384615
+F score: 0.7192118226600985
+
+Results for model trained on 400 documents:
+True positives: 63
+False negatives: 67
+True negatives: 130
+False positives: 0
+Precision: 1.0
+Recall: 0.4846153846153846
+F score: 0.6528497409326425
+
+Results for model trained on 700 documents:
 True positives: 70
 False negatives: 60
 True negatives: 129

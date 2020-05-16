@@ -31,26 +31,21 @@ def isSpam(d):
     #initial probability of a given classification can be ignored
     spamTot = log(sum(SPAM_CTS[t] for t in SPAM_CTS) + len(V))
     nonspamTot = log(sum(NONSPAM_CTS[t] for t in NONSPAM_CTS) + len(V))
-    #print(spamTot, nonspamTot)
     for word, count in bow.items():
         if count > 0:
             nsProb += log(count * (NONSPAM_CTS[word] + 1)) - nonspamTot
             sProb += log(count * (SPAM_CTS[word] + 1)) - spamTot
 
-    #print(exp(sProb), exp(nsProb))
     return exp(sProb) > exp(nsProb)
 
 def classifyDocs(dir):
     sCount = 0;
     nsCount = 0;
     for fname in os.listdir(os.getcwd() + '/' + dir):
-        #print('Classifying', fname)
         with open('{}/{}/{}'.format(os.getcwd(), dir, fname), 'r') as doc:
             if isSpam(doc):
-                #print('spam')
                 sCount += 1
             else:
-                #print('not spam')
                 nsCount += 1
     return (sCount, nsCount)
 
@@ -64,13 +59,18 @@ def f1score(p, r):
     return 2 * p * r / (p + r)
 
 
-def main():
-    output = open('report/output.txt', 'w')
+def generateReport(trainSize, output):
+    global V, SPAM_CTS, NONSPAM_CTS
+    V = Vocabulary(pickle.load(open('obj/vocab_{}.p'.format(str(trainSize)), 'rb')))
+    SPAM_CTS = dict(pickle.load(open('obj/spam_cts_{}.p'.format(str(trainSize)), 'rb')))
+    NONSPAM_CTS = dict(pickle.load(open('obj/nonspam_cts_{}.p'.format(str(trainSize)), 'rb')))
+
     (tp, fn) = classifyDocs('data/spam-test')
     (fp, tn) = classifyDocs('data/nonspam-test')
     r = recall(tp, tn, fn)
     p = precision(tp, tn, fp)
     f1 = f1score(p, r)
+    output.write('\nResults for model trained on {} documents:\n'.format(trainSize))
     output.write('True positives: ' + str(tp) + '\n')
     output.write('False negatives: ' + str(fn) + '\n')
     output.write('True negatives: ' + str(tn) + '\n')
@@ -78,6 +78,11 @@ def main():
     output.write('Precision: ' + str(p) + '\n')
     output.write('Recall: ' + str(r) + '\n')
     output.write('F score: ' + str(f1) + '\n')
+
+def main():
+    output = open('report/output.txt', 'w')
+    for n in (50, 100, 400, 700):
+        generateReport(n, output)
 
 
 if __name__=='__main__':

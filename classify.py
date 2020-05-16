@@ -7,7 +7,6 @@ V = Vocabulary(pickle.load(open('obj/vocab.p', 'rb')))
 SPAM_CTS = dict(pickle.load(open('obj/spam_cts.p', 'rb')))
 NONSPAM_CTS = dict(pickle.load(open('obj/nonspam_cts.p', 'rb')))
 
-print(type(SPAM_CTS))
 
 
 def bagOfWords(d):
@@ -15,6 +14,7 @@ def bagOfWords(d):
     for word in d.read().split():
         if word in bow:
             bow[word] += 1
+            #print(word)
     return bow
 
 
@@ -29,33 +29,56 @@ def isSpam(d):
     bow = bagOfWords(d)
     #The training data had an equal number of spam and nonspam documents so the
     #initial probability of a given classification can be ignored
-    for word in bow:
-        sProb += log(SPAM_CTS[word] + 1) - log(sum(SPAM_CTS[t] for t in SPAM_CTS) + len(V))
-        nsProb += log(NONSPAM_CTS[word] + 1) - log(sum(NONSPAM_CTS[t] for t in NONSPAM_CTS) + len(V))
+    spamTot = log(sum(SPAM_CTS[t] for t in SPAM_CTS) + len(V))
+    nonspamTot = log(sum(NONSPAM_CTS[t] for t in NONSPAM_CTS) + len(V))
+    #print(spamTot, nonspamTot)
+    for word, count in bow.items():
+        if count > 0:
+            nsProb += log(count * (NONSPAM_CTS[word] + 1)) - nonspamTot
+            sProb += log(count * (SPAM_CTS[word] + 1)) - spamTot
 
+    #print(exp(sProb), exp(nsProb))
     return exp(sProb) > exp(nsProb)
 
 def classifyDocs(dir):
     sCount = 0;
     nsCount = 0;
     for fname in os.listdir(os.getcwd() + '/' + dir):
-        print('Classifying', fname)
+        #print('Classifying', fname)
         with open('{}/{}/{}'.format(os.getcwd(), dir, fname), 'r') as doc:
             if isSpam(doc):
-                print('spam')
+                #print('spam')
                 sCount += 1
             else:
-                print('not spam')
+                #print('not spam')
                 nsCount += 1
     return (sCount, nsCount)
 
+def recall(tp, tn, fn):
+    return tp/(tp + fn)
+
+def precision(tp, tn, fp):
+    return tp/(tp + fp)
+
+def f1score(p, r):
+    return 2 * p * r / (p + r)
+
+
 def main():
-    (spam, nonspam) = classifyDocs('data/spam-test')
-    print('True positives:', spam)
-    print('False positives:', nonspam)
-    (spam, nonspam) = classifyDocs('data/nonspam-test')
-    print('True negatives:', nonspam)
-    print('False negatives:', spam)
+    output = open('report/output.txt', 'w')
+    (tp, fn) = classifyDocs('data/spam-test')
+    (fp, tn) = classifyDocs('data/nonspam-test')
+    r = recall(tp, tn, fn)
+    p = precision(tp, tn, fp)
+    f1 = f1score(p, r)
+    output.write('True positives: ' + str(tp) + '\n')
+    output.write('False negatives: ' + str(fn) + '\n')
+    output.write('True negatives: ' + str(tn) + '\n')
+    output.write('False positives: ' + str(fp) + '\n')
+    output.write('Precision: ' + str(p) + '\n')
+    output.write('Recall: ' + str(r) + '\n')
+    output.write('F score: ' + str(f1) + '\n')
+
 
 if __name__=='__main__':
     main()
